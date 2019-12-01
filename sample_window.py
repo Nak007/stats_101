@@ -2,8 +2,6 @@
 import pandas as pd, numpy as np, calendar
 import matplotlib.pylab as plt
 
-#@markdown **_class_** : vintage_analysis
-
 class vintage_analysis:
 
   '''
@@ -242,7 +240,6 @@ class vintage_analysis:
     if fname is not None: plt.savefig(fname)
     plt.tight_layout()
     plt.show()
-#@markdown **_class_** : waterfall
 
 class waterfall:
 
