@@ -231,7 +231,7 @@ class two_sample_test:
       # check whether two means are the same
       t_stat, p_value = independent_ttest(x1, x2)
       # check whether the proportion in respective bins are the same
-      crit_val, chi_p_value = chi_square(x1,x2)
+      crit_val, chi_p_value = chi_square(x1,x2,self.n_interval)
       p = np.array([var, n_x1, n_x2, t_stat, p_value, 
                     crit_val, chi_p_value]).reshape(1,-1)
       if n==0: a = p
@@ -281,7 +281,7 @@ def independent_ttest(x1, x2):
 
   return t_stat, p
 
-def chi_square(x1, x2):
+def chi_square(x1, x2, n_interval=100):
 
   '''
   Using Chi-Square to test Goodness-of-Fit-Test
@@ -289,7 +289,7 @@ def chi_square(x1, x2):
   distribution from a certain population.
   Null Hypothesis: two sampels are fit the expected population 
   '''
-  a, pct = list(x1) + list(x2), np.arange(0,100.1,100/self.n_interval)
+  a, pct = list(x1) + list(x2), np.arange(0,100.1,100/n_interval)
   bins = np.unique([np.percentile(a,n) for n in pct])
   bins[-1] = bins[-1] + 1
   a, _ = np.histogram(x1, bins=bins)
