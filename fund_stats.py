@@ -232,6 +232,10 @@ class two_sample_test:
       n_x1, n_x2 = x1.shape[0], x2.shape[0]
       # check whether two means are the same
       t_stat, p_value = independent_ttest(x1, x2)
+      
+      print('dddd')
+
+      
       # check whether the proportion in respective bins are the same
       crit_val, chi_p_value = chi_square(x1,x2, self.n_interval)
       p = np.array([var, n_x1, n_x2, t_stat, p_value, 
@@ -291,7 +295,7 @@ def chi_square(x1, x2, n_interval=100):
   distribution from a certain population.
   Null Hypothesis: two sampels are fit the expected population 
   '''
-  print(n_interval)
+  
   a, pct = list(x1) + list(x2), np.arange(0,100.1,100/n_interval)
   bins = np.unique([np.percentile(a,n) for n in pct])
   bins[-1] = bins[-1] + 1
