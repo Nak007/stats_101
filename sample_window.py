@@ -36,10 +36,10 @@ class vintage_analysis:
     '''
     a : (dataframe)
     ===========================================
-    |   | cif_no	| max_dpd	|   mdata	  | mob |
+    |   | cif_no  | max_dpd |   mdata   | mob |
     -------------------------------------------
-    | 0	| YX13KX	|    1	  | 31JAN2017 |	 0  |
-    | 1	| OX123C	|    1	  | 31JAN2017 |	 0  |
+    | 0	| YX13KX  |    1    | 31JAN2017 |  0. |
+    | 1	| OX123C  |    1    | 31JAN2017 |  0. |
     ===========================================
     - cif_no : (str), 12-digit integer
     - max_dpd : (int), maximum dpd within a month
@@ -272,10 +272,10 @@ class waterfall:
     '''
     a : (dataframe)
     ==========================
-    |   |  item	  |  amount  |
+    |   |   item  |  amount  |
     --------------------------
-    | 0	| item_01	|  10,000	 |
-    | 1	| item_02	|  -8,000	 |
+    | 0	| item_01 |  10,000. |
+    | 1	| item_02 |  -8,000. |
     ==========================
     - item : (str), name of items
     - amount : (float), amount of items
