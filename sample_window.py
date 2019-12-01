@@ -224,7 +224,7 @@ class vintage_analysis:
     axis.fill_between(x_ticks,y,**kwargs)
 
     bbx_kw = dict(boxstyle='round',facecolor='white',alpha=0)
-    s = tuple(('Sample = {:,.0f}'.format(n_total),
+    s = tuple(('Sample = {:,.0f}'.format(n_total), 
                '%BAD = {:,.2f}% ({:,.0f})'.format(max(y),max(y)*n_total/100)))
     axis.text(0.05, 0.95, '\n'.join(s), transform=axis.transAxes, 
               fontsize=12, va='top', ha='left', bbox=bbx_kw) 
@@ -237,6 +237,127 @@ class vintage_analysis:
     t = 'Vintage Analysis (All) \n observation = %d, performance = %d, dpd = %d+' 
     axis.set_title(t % (self.obs_mth, self.per_mth, self.per_dpd), fontsize=12)
     axis.set_xticklabels(['M'+str(n) for n in x_ticks], fontsize=10)
+    axis.grid(False)
+    
+    if fname is not None: plt.savefig(fname)
+    plt.tight_layout()
+    plt.show()
+#@markdown **_class_** : waterfall
+
+class waterfall:
+
+  '''
+  Method
+  ------
+  
+  \t self.plot(a, width=6, height=4, rotation=0, n_pts=0.1, 
+               y_label='Amount', loc='best', fname=None)
+  \t **Return**
+  \t - self.waterfall : (dataframe), data table used in making chart
+  \t - plot waterfall chart
+  '''
+  def __init__(self, c_inc='#f10606', c_dec='#0ea854', 
+               lb_inc='Increase', lb_neg='Decrease'):
+    
+    self.init_cols = ['item', 'amount']
+    self.color, self.labels = [c_inc, c_dec], [lb_inc, lb_neg]
+    self.va = ['top','bottom']
+    self.pct = ['-{:.2f}%','+{:.2f}%']
+    self.amt = ['(-{:,.0f})','(+{:,.0f})']
+    self.b_kwargs = dict(width=0.6, color='#fed434', alpha=0.7, edgecolor='#6b6b6b',hatch='////', lw=1)
+    self.l_kwargs = dict(fontsize=10, framealpha=0, edgecolor='none')
+
+  def __waterfall_df(self, a):
+    
+    '''
+    a : (dataframe)
+    ==========================
+    |   |  item	  |  amount  |
+    --------------------------
+    | 0	| item_01	|  10,000	 |
+    | 1	| item_02	|  -8,000	 |
+    ==========================
+    - item : (str), name of items
+    - amount : (float), amount of items
+    '''
+
+    a['pos'] = 0; a.loc[a['amount']>=0,'pos'] = 1
+    a['neg'] = (~a['pos'].astype(bool)).astype(int)
+    a['bottom'] = np.cumsum(a['amount'])-(a['amount']*a['pos'])
+    a['height'], total = abs(a['amount']), a['amount'].sum()
+    if total>=0: s = {'item':'total','bottom':0,'height':total,'pos':1,'neg':0}
+    else: s = {'item':'total','bottom':total,'height':-total,'pos':0,'neg':1 }
+    a = a.append(s, ignore_index=True)
+    a['pct'] = a['height']/float(a.iloc[0,5])*100
+    return a
+
+  def plot(self, a, width=6, height=4, rotation=0, n_pts=0.1, 
+           y_label='Amount', title='Waterfall Chart', loc='best', 
+           fname=None):
+    
+    '''
+    Parameters
+    ----------
+
+    \t a : (dataframe)
+    \t ===========================
+    \t |   |  item	  |  amount  |
+    \t --------------------------
+    \t | 0	| item_01	|  10,000	 |
+    \t | 1	| item_02	|  -8,000	 |
+    \t ===========================
+    \t - item : (str), name of items
+    \t - amount : (float), amount of items
+    \t width, height : (float), width and height of plot (default=(6,4))
+    \t rotation : (int), rotation angle of x-label (default=0)
+    \t n_pts : (float), distance of annotation away from bar chart (default=0.1)
+    \t y_label : (str), label on y-axis (defualt='Amount')
+    \t title : (str), title of chart (default=Waterfall Chart')
+    \t loc : (str, float), location of the legend (see matplotlib.axes.legend)
+    '''
+    # transform data
+    self.waterfall = self.__waterfall_df(a)
+    a = self.waterfall.copy()
+
+    # plot waterfall
+    fig, axis = plt.subplots(1,1, figsize=(width,height))
+    axis.axhline(0, lw=1, color='k')
+    x_ticks = range(len(a))
+    for m,n in enumerate(['neg','pos']):
+      self.b_kwargs.update(dict(bottom=a['bottom']*a[n], 
+                                label=self.labels[m]), color=self.color[m])
+      axis.bar(x_ticks, a['height']*a[n], **self.b_kwargs)
+    
+    # determine tick interval (assigned automatically)
+    y_ticks = axis.get_yticks()  
+    const = max(abs(np.diff(y_ticks)))
+
+    # annotation
+    gap = [-n_pts*const,n_pts*const]
+    for n, pos in enumerate(a['pos']):
+      if pos==1: y = a.loc[n,['bottom','height']].sum()
+      else: y = a.loc[n,'bottom']
+      kwargs = dict(va=self.va[pos], color=self.color[pos], 
+                    ha='center', fontsize=9)
+      s = tuple((self.pct[pos].format(a.loc[n,'pct']), 
+                 self.amt[pos].format(a.loc[n,'height'])))
+      axis.text(n, y + gap[pos], '\n'.join(s), **kwargs)
+
+    # set y-axis
+    ylim = axis.get_ylim()
+    axis.set_ylim(ylim[0]-const,ylim[1]+const)
+    axis.set_yticks([])
+    axis.set_facecolor('white')
+    axis.set_ylabel(y_label, fontsize=10)
+
+    # set x-axis
+    axis.set_xticks(x_ticks)
+    axis.set_xlim(-0.5,len(x_ticks)-0.5)
+    x_labels = [n for n in a['item']]
+    axis.set_xticklabels(x_labels, fontsize=10, rotation=rotation)
+    self.l_kwargs.update(dict(loc=loc))
+    axis.legend(**self.l_kwargs)
+    axis.set_title(title, fontsize=14)
     axis.grid(False)
     
     if fname is not None: plt.savefig(fname)
