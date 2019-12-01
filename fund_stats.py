@@ -218,9 +218,11 @@ class two_sample_test:
     '''
     Parameters
     ----------
-    expected and observed
+
     \t X1, X2 : (array-like, sparse matrix), shape = [n_samples, n_features]
     \t tt_alpha : (float), two-tailed alpha e.g. 1% = 0.01 (rejection area)
+    \t chi_alpha
+    \t
     '''
     features = list(set(X1.columns).intersection(X2.columns))
     columns = ['variable','n_X1','n_X2','t_stat','p_value_1t',
@@ -231,7 +233,7 @@ class two_sample_test:
       # check whether two means are the same
       t_stat, p_value = independent_ttest(x1, x2)
       # check whether the proportion in respective bins are the same
-      crit_val, chi_p_value = chi_square(x1,x2,self.n_interval)
+      crit_val, chi_p_value = chi_square(x1,x2, self.n_interval)
       p = np.array([var, n_x1, n_x2, t_stat, p_value, 
                     crit_val, chi_p_value]).reshape(1,-1)
       if n==0: a = p
@@ -289,6 +291,7 @@ def chi_square(x1, x2, n_interval=100):
   distribution from a certain population.
   Null Hypothesis: two sampels are fit the expected population 
   '''
+  print(n_interval)
   a, pct = list(x1) + list(x2), np.arange(0,100.1,100/n_interval)
   bins = np.unique([np.percentile(a,n) for n in pct])
   bins[-1] = bins[-1] + 1
