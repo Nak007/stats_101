@@ -229,8 +229,8 @@ class two_sample_test:
     \t X1, X2 : (array-like, sparse matrix), shape = [n_samples, n_features]
     '''
     features = list(set(X1.columns).intersection(X2.columns))
-    columns = ['variable','n_X1','n_X2','t_stat','p_value_1t',
-               'crit_val','chi_p_value']
+    columns = ['variable','n_X1','n_X2','t_stat','p_value_1t','crit_val','chi_p_value']
+    
     for (n,var) in enumerate(features):
       x1, x2 = X1.loc[X1[var].notna(),var], X2.loc[X2[var].notna(),var]
       n_x1, n_x2 = x1.shape[0], x2.shape[0]
@@ -238,8 +238,7 @@ class two_sample_test:
       t_stat, p_value = self.__ttest(x1, x2)
       # check whether the proportion in respective bins are the same
       crit_val, chi_p_value = self.__chi_square(x1,x2)
-      p = np.array([var, n_x1, n_x2, t_stat, p_value, 
-                    crit_val, chi_p_value]).reshape(1,-1)
+      p = np.array([var, n_x1, n_x2, t_stat, p_value, crit_val, chi_p_value]).reshape(1,-1)
       if n==0: a = p
       else: a = np.vstack((a,p))
 
