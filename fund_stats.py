@@ -17,9 +17,6 @@ class outliers:
   \t - self.cap_df : (dataframe), table of lower and upper limits for each respective variables
   \t - self.capped_X : (dataframe), X variables that are capped and floored
   '''
-
-  import pandas as pd, numpy as np
-
   def __init__(self, method='gamma', pct_alpha=1, beta_sigma=3, beta_iqr=1.5, pct_limit=10, n_interval=100):
     
     '''
