@@ -162,7 +162,7 @@ class outliers:
     c = a[~np.isnan(a)].copy()
     c[(c>high)], c[(c<low)] = high, low
     a[~np.isnan(a)] = c
-    return a
+    return np.array(a)
   
   def __to_array(self, X):
     
