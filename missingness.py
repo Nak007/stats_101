@@ -45,8 +45,9 @@ class overview:
     \t self.missing_pct_ : (dataframe), table of missingness (%) by variable
     \t self.n_records : (float), number of records
     '''
+    ch_name, fname = ['pie_chart.png','by_variable.png','by_record.png'], np.full(3,None)
     if isinstance(X, pd.core.frame.DataFrame):
-      if folder!=None: fname = [folder]
+      if folder!=None: fname = [folder+n for n in ch_name]
       self.threshold, self.cutoff = threshold, cutoff
       self.n_records = len(X)
       self.__pie_charts(X, figsize[0])
