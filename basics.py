@@ -110,7 +110,7 @@ class two_sample_test:
     a = a/sum(a); b = b/sum(b)
     exp = np.vstack((a,b)).sum(axis=0)
     exp[(exp==0)] = 1 # <-- denominator must not be null
-    dof = len(a) - 1 #<-- degree of freedoms
+    dof = max(len(a)-1,1) #<-- degree of freedoms
     crit_val = sum((a-exp)**2/exp) + sum((b-exp)**2/exp)
     p_value = 1-chi2.cdf(crit_val, df=dof)
     return crit_val, p_value
