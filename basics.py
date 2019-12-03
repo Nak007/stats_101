@@ -52,7 +52,8 @@ class two_sample_test:
     # Convert variables to number
     a = pd.DataFrame(a, columns=columns)
     for var in columns[1:]:
-      a[var] = pd.to_numeric(a[var], errors='ignore')
+      #a[var] = pd.to_numeric(a[var], errors='ignore')
+      a[var] = a[var].astype(float)
     a['reject_tt_H0'] = False
     #a.loc[a['p_value_1t']<self.tt_alpha/2,'reject_tt_H0'] = True
     a['reject_chi_H0'] = False
