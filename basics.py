@@ -68,8 +68,7 @@ class outliers:
   def __percentile(self, X):
     
     '''
-    List of nth percentiles 
-    arranged in increasing manner
+    List of nth percentiles arranged in increasing manner
     '''
     n_range = np.arange(self.n_interval+1)
     p_range = [n/self.n_interval*100 for n in n_range]
@@ -150,6 +149,11 @@ class outliers:
       nonan = ~np.isnan(a[:,n])
       low, high = max(low, min(a[:,n])), min(high, max(a[:,n]))
       args = tuple((a[:,n], low , high))
+      
+      print(n)
+      print(args)
+      print(self.__cap_outlier(*args)
+      
       self.capped_X[nonan,n] = self.__cap_outlier(*args)
       self.cap_df.iloc[n,1], self.cap_df.iloc[n,2] = low, high
     self.capped_X = pd.DataFrame(self.capped_X, columns=self.field_names)
