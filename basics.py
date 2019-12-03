@@ -54,7 +54,7 @@ class two_sample_test:
     for var in columns[1:]:
       a[var] = pd.to_numeric(a[var], errors='ignore')
     a['reject_tt_H0'] = False
-    a.loc[a['p_value_1t']<self.tt_alpha/2,'reject_tt_H0'] = True
+    #a.loc[a['p_value_1t']<self.tt_alpha/2,'reject_tt_H0'] = True
     a['reject_chi_H0'] = False
     #a.loc[a['chi_p_value']<self.chi_alpha,'reject_chi_H0'] = True
     self.t_result = a
