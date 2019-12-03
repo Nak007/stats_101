@@ -133,7 +133,8 @@ class outliers:
   \t - self.cap_df : (dataframe), table of lower and upper limits for each respective variables
   \t - self.capped_X : (dataframe), X variables that are capped and floored
   '''
-  def __init__(self, method='gamma', pct_alpha=1, beta_sigma=3, beta_iqr=1.5, pct_limit=10, n_interval=100):
+  def __init__(self, method='gamma', pct_alpha=1, beta_sigma=3, 
+               beta_iqr=1.5, pct_limit=10, n_interval=100):
     
     '''
     Parameters
@@ -151,6 +152,8 @@ class outliers:
     self.pct_limit, self.n_interval = pct_limit, n_interval
     self.mid_index = int(n_interval*0.5)
     self.low_pct = int(n_interval*pct_limit/100)
+    
+    print("aaa")
   
   def __delta_gamma(self, X, delta_asec=True, gamma_asec=True):
 
