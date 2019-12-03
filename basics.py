@@ -1,6 +1,8 @@
 import pandas as pd, numpy as np, time, math
 from scipy.stats import t, chi2
-  
+
+#@markdown **_class_** : two_sample_test
+
 class two_sample_test:
 
   '''
@@ -112,6 +114,8 @@ class two_sample_test:
     p_value = 1-chi2.cdf(crit_val, df=dof)
     return crit_val, p_value
 
+#@markdown **_class_** : outliers
+  
 class outliers:
   
   '''
