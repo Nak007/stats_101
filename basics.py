@@ -152,9 +152,7 @@ class outliers:
     self.pct_limit, self.n_interval = pct_limit, n_interval
     self.mid_index = int(n_interval*0.5)
     self.low_pct = int(n_interval*pct_limit/100)
-    
-    print("aaa")
-  
+
   def __delta_gamma(self, X, delta_asec=True, gamma_asec=True):
 
     '''
