@@ -50,9 +50,9 @@ class overview:
       if folder!=None: fname = [folder+n for n in ch_name]
       self.threshold, self.cutoff = threshold, cutoff
       self.n_records = len(X)
-      self.__pie_charts(X, figsize[0])
-      self.__by_variable(X, figsize[1])
-      self.__by_record(X, figsize[2])
+      self.__pie_charts(X, figsize[0],fname[0])
+      self.__by_variable(X, figsize[1],fname[1])
+      self.__by_record(X, figsize[2],fname[2])
 
   def __pie_charts(self, X, figsize=(12,4), fname=None):
 
