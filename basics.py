@@ -267,8 +267,8 @@ class outliers:
       # cap values in dataframe
       low = max(low, np.nanmin(a))
       high = min(high, np.nanmax(a))
-      self.capped_X.loc[(a.notna()) & (a<low),var] = low
-      self.capped_X.loc[(a.notna()) & (a>high),var] = high
+      self.capped_X.loc[(~np.isnan(a)) & (a<low),var] = low
+      self.capped_X.loc[(~np.isnan(a)) & (a>high),var] = high
       self.cap_df.iloc[n,1], self.cap_df.iloc[n,2] = low, high
   
   def __to_df(self, X):
