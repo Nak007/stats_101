@@ -29,36 +29,36 @@ class two_sample_test:
 
     def fit(self, X1, X2):
 
-    '''
-    Parameters
-    ----------
+        '''
+        Parameters
+        ----------
 
-    \t X1, X2 : (array-like, sparse matrix), shape = [n_samples, n_features]
-    '''
-    features = list(set(X1.columns).intersection(X2.columns))
-    columns = ['variable','n_X1','n_X2','t_stat','p_value_1t','crit_val','chi_p_value']
+        \t X1, X2 : (array-like, sparse matrix), shape = [n_samples, n_features]
+        '''
+        features = list(set(X1.columns).intersection(X2.columns))
+        columns = ['variable','n_X1','n_X2','t_stat','p_value_1t','crit_val','chi_p_value']
 
-    for (n,var) in enumerate(features):
-        x1, x2 = X1.loc[X1[var].notna(),var], X2.loc[X2[var].notna(),var]
-        n_x1, n_x2 = x1.shape[0], x2.shape[0]
-        # check whether two means are the same
-        t_stat, p_value = self.__ttest(x1, x2)
-        # check whether the proportion in respective bins are the same
-        crit_val, chi_p_value = self.__chi_square(x1,x2)
-        p = np.array([var, n_x1, n_x2, t_stat, p_value, crit_val, chi_p_value]).reshape(1,-1)
-        if n==0: a = p
-        else: a = np.vstack((a,p))
+        for (n,var) in enumerate(features):
+            x1, x2 = X1.loc[X1[var].notna(),var], X2.loc[X2[var].notna(),var]
+            n_x1, n_x2 = x1.shape[0], x2.shape[0]
+            # check whether two means are the same
+            t_stat, p_value = self.__ttest(x1, x2)
+            # check whether the proportion in respective bins are the same
+            crit_val, chi_p_value = self.__chi_square(x1,x2)
+            p = np.array([var, n_x1, n_x2, t_stat, p_value, crit_val, chi_p_value]).reshape(1,-1)
+            if n==0: a = p
+            else: a = np.vstack((a,p))
 
-    # Convert variables to number
-    a = pd.DataFrame(a, columns=columns)
-    for var in columns[1:]:
-        #a[var] = pd.to_numeric(a[var], errors='ignore')
-        a[var] = a[var].astype(float)
-    a['reject_tt_H0'] = False
-    a.loc[a['p_value_1t']<self.tt_alpha/2,'reject_tt_H0'] = True
-    a['reject_chi_H0'] = False
-    a.loc[a['chi_p_value']<self.chi_alpha,'reject_chi_H0'] = True
-    self.t_result = a
+        # Convert variables to number
+        a = pd.DataFrame(a, columns=columns)
+        for var in columns[1:]:
+            #a[var] = pd.to_numeric(a[var], errors='ignore')
+            a[var] = a[var].astype(float)
+        a['reject_tt_H0'] = False
+        a.loc[a['p_value_1t']<self.tt_alpha/2,'reject_tt_H0'] = True
+        a['reject_chi_H0'] = False
+        a.loc[a['chi_p_value']<self.chi_alpha,'reject_chi_H0'] = True
+        self.t_result = a
 
     def __ttest(self, x1, x2):
 
@@ -252,15 +252,15 @@ class outliers:
         self.cap_df['variable'] = self.field_names
 
         for n,var in enumerate(self.field_names):
-        a = self.capped_X[var]
-        if self.method == 'gamma':
-            low, high = self.__gamma_cap(a)
-        elif self.method == 'interquartile':
-            low, high = self.__iqr_cap(a)
-        elif self.method == 'sigma':
-            low, high = self.__sigma_cap(a)
-        elif self.method == 'percentile':
-            low, high = self.__pct_cap(a)
+            a = self.capped_X[var]
+            if self.method == 'gamma':
+                low, high = self.__gamma_cap(a)
+            elif self.method == 'interquartile':
+                low, high = self.__iqr_cap(a)
+            elif self.method == 'sigma':
+                low, high = self.__sigma_cap(a)
+            elif self.method == 'percentile':
+                low, high = self.__pct_cap(a)
 
         # cap values in dataframe
         low = max(low, np.nanmin(a))
