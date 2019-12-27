@@ -3,8 +3,6 @@ from scipy.stats import t, chi2
 import ipywidgets as widgets
 from IPython.display import display
 
-# **_class_** : two_sample_test
-
 class two_sample_test:
 
     '''
@@ -74,7 +72,7 @@ class two_sample_test:
             
         for (n,var) in enumerate(features,1):
             
-            self.w_t2.value = '({:.0f}%) '.format((n/n_features)*100) + var
+            self.w_t2.value = '( {:.0f}% ) '.format((n/n_features)*100) + var
             time.sleep(0.1)
             
             x1 = X1.loc[~np.isnan(X1[var]),var]
@@ -139,6 +137,7 @@ class two_sample_test:
                 self.best_result = self.tt_result
         self.w_t1.value = 'Complete : ' 
         self.w_t2.value = 'Best Rejection = %d , random_state = %d' % (best_reject,self.random_state)
+        print('Result : self.tt_result, self.best_result, and self.random_state')
 
     def __ttest(self, x1, x2):
 
@@ -202,10 +201,8 @@ class two_sample_test:
         self.w_t1 = widgets.HTMLMath(value='Calculating . . . ')
         self.w_t2 = widgets.HTMLMath(value='')
         w = widgets.HBox([self.w_t1,self.w_t2])
-        display(w); time.sleep(5)
+        display(w); time.sleep(2)
         
-# **_class_** : outliers
-  
 class outliers:
   
     '''
@@ -217,11 +214,9 @@ class outliers:
 
     Methods
     -------
-
-    \t self.fit(X)
-    \t **Return**
-    \t - self.cap_df : (dataframe), table of lower and upper limits for each respective variables
-    \t - self.capped_X : (dataframe), X variables that are capped and floored
+    
+    self.fit(X)
+    
     '''
     def __init__(self, method='gamma', pct_alpha=1, beta_sigma=3, beta_iqr=1.5, pct_limit=10, n_interval=100):
 
@@ -229,12 +224,23 @@ class outliers:
         Parameters
         ----------
 
-        \t method : (str), method of capping outliers i.e. 'percentile', 'sigma', 'interquartile', and 'gamma'
-        \t pct_alpha : (float), percentage of one-tailed alpha (default=1)
-        \t beta_sigma : (float), standard deviation (default=3)
-        \t beta_iqr : (float), inter-quartile-range multiplier (default=1.5)
-        \t pct_limit : (float), limit of percentile from both ends of distribution (defalut=10)
-        \t n_interval : (int), number of intervals within per_limit (default=100)
+        method : (str), optional (default='gamma')
+        \t method of capping outliers i.e. 'percentile', 'sigma', 'interquartile', and 'gamma'
+        
+        pct_alpha : (float), optional (default=1)
+        \t percentage of one-tailed alpha 
+        
+        beta_sigma : (float), optional (default=3)
+        \t standard deviation 
+        
+        beta_iqr : (float), optional (default=1.5)
+        \t inter-quartile-range multiplier 
+        
+        pct_limit : (float), optional (defalut=10)
+        \t limit of percentile from both ends of distribution 
+        
+        n_interval : (int), optional (default=100)
+        \t number of intervals within per_limit 
         '''
         self.method = method
         self.pct_alpha, self.beta_sigma, self.beta_iqr = pct_alpha, beta_sigma, beta_iqr
@@ -250,24 +256,24 @@ class outliers:
         Parameters
         ----------
 
-        \t X : (dataframe), array-like shape(n_sample, n_feature)
-        \t delta_asec : (boolean), True = ascendingly ordered delta
-        \t gamma_asec : (boolean), True = ascendingly ordered gamma
+        X : dataframe, array-like shape of (n_sample, n_feature)
+        
+        delta_asec : boolean, optional (default=True)
+        \t Whether or not to rearrange delta (change in values) in ascending manner
+        
+        gamma_asec : boolean, optional (default=True)
+        \t Whether or not to rearrange gamma (change in deltas) in ascending manner
         '''
         # Slope (Delta)
-        diff_X, divisor = np.diff(X), abs(np.array(X.copy()))
-        divisor[divisor==0] = 1
-        if delta_asec == True: divisor = divisor[:len(diff_X)]
-        else: divisor = -1*divisor[1:]
+        diff_X = np.diff(X)
+        divisor = np.where(np.array(X)==0,1,abs(np.array(X)))
+        divisor = np.where(delta_asec==True,divisor[:len(diff_X)],-1*divisor[1:])
         delta = diff_X/divisor
 
         # Change in slope (Gamma)
-        diff_del = np.diff(delta)
-        divisor = abs(np.array(delta))
-        divisor[divisor==0] = 1
-        if gamma_asec == True: divisor = divisor[:len(diff_del)]
-        else: divisor = -1*divisor[1:]
-        gamma = diff_del/divisor
+        divisor = np.where(delta==0,1,abs(delta))
+        divisor = np.where(gamma_asec==True,divisor[:len(delta)-1],-1*divisor[1:])
+        gamma = np.diff(delta)/divisor
         return delta, gamma
   
     def __percentile(self, X):
@@ -282,7 +288,7 @@ class outliers:
     def __gamma_cap(self, X):
 
         # Copy and eliminate all nans
-        a = self.__percentile(self.__nonan(X))
+        a = self.__percentile(X.copy())
 
         # Low side delta and gamma. Gamma is arranged in reversed order 
         # as change is determined towards the lower number.
@@ -309,71 +315,105 @@ class outliers:
         low, high = min(low, iqr_low), max(high, iqr_high)
         return low, high
 
-    def __iqr_cap(self, X):
+    def __iqr_cap(self, a):
 
-        a = self.__nonan(X)
         q1, q3 = np.percentile(a,25), np.percentile(a,75)
         low = q1 - (q3-q1)*self.beta_iqr
         high = q3 + (q3-q1)*self.beta_iqr
         return low, high
   
-    def __sigma_cap(self, X):
+    def __sigma_cap(self, a):
 
-        a = self.__nonan(X)
         mu, sigma = np.mean(a), np.std(a)*self.beta_sigma
         low, high = mu-sigma, mu+sigma
         return low, high
   
-    def __pct_cap(self, X):
+    def __pct_cap(self, a):
 
-        a = self.__nonan(X)
         low = np.percentile(a,self.pct_alpha)
         high = np.percentile(a,100-self.pct_alpha)
         return low, high
   
     def fit(self, X):
+        
+        '''
+        Parameters
+        ----------
+        
+        X : array-like shape of (n_sample, n_feature)
+        
+        Return
+        ------
+        
+        self.cap_df : dataframe, array-like shape of (n_feature, ['variable','lower','upper'])
+        \t table of lower and upper limits
 
+        self.capped_X : dataframe, array-like shape of (n_sample, n_feature)
+        \t X variables that are capped and floored
+        
+        self.complete_nan : list of str
+        \t list of variables that contain only missing values
+        '''
         # Convert data into dataframe
+        self.__widgets()
         self.capped_X = self.__to_df(X)
 
         # Lower and Upper bound dataframe
         self.cap_df = pd.DataFrame(columns=['variable','lower','upper'])
         self.cap_df['variable'] = self.field_names
-
-        for n,var in enumerate(self.field_names):
-            a = self.capped_X[var]
-            if self.method == 'gamma':
-                low, high = self.__gamma_cap(a)
-            elif self.method == 'interquartile':
-                low, high = self.__iqr_cap(a)
-            elif self.method == 'sigma':
-                low, high = self.__sigma_cap(a)
-            elif self.method == 'percentile':
-                low, high = self.__pct_cap(a)
-            else: low, high = self.__pct_cap(a)
-
-            # cap values in dataframe
-            low = max(low, np.nanmin(a))
-            high = min(high, np.nanmax(a))
-            self.capped_X.loc[(~np.isnan(a)) & (a<low),var] = low
-            self.capped_X.loc[(~np.isnan(a)) & (a>high),var] = high
-            self.cap_df.iloc[n,1], self.cap_df.iloc[n,2] = low, high
+        
+        self.w_t1.value = self.method.upper() + ' ==> '
+        n_features = len(self.field_names)
+        self.complete_nan = list()
+        
+        for (n,var) in enumerate(self.field_names):
+            
+            self.w_t2.value = '( {:.0f}% ) '.format(((n+1)/n_features)*100) + var
+            time.sleep(0.1)
+            
+            # eliminate np.nan
+            a = self.capped_X[var].copy()
+            nonan = a.loc[~np.isnan(a)]
+            
+            if len(nonan) > 0:
+                if self.method == 'gamma':
+                    low, high = self.__gamma_cap(nonan)
+                elif self.method == 'interquartile':
+                    low, high = self.__iqr_cap(nonan)
+                elif self.method == 'sigma':
+                    low, high = self.__sigma_cap(nonan)
+                elif self.method == 'percentile':
+                    low, high = self.__pct_cap(nonan)
+                else: low, high = self.__pct_cap(nonan)
+                # cap values in dataframe
+                low = max(low, np.nanmin(a))
+                high = min(high, np.nanmax(a))
+                self.capped_X.loc[(~np.isnan(a)) & (a<low),var] = low
+                self.capped_X.loc[(~np.isnan(a)) & (a>high),var] = high
+            else: 
+                low, high = np.nan, np.nan
+                self.complete_nan.append(var)
+                
+            self.cap_df.iloc[n,1] = low
+            self.cap_df.iloc[n,2] = high
+        
+        self.w_t1.value = 'Complete : '
+        n_nan = ', no. of variables w/ complete NaN = %s' % '{:,.0f}'.format(len(self.complete_nan))
+        self.w_t2.value = 'no. of variables = %s' % '{:,.0f}'.format(n_features) + n_nan
+        print('Result : self.cap_df, self.capped_X, and self.complete_nan')
   
     def __to_df(self, X):
 
-        '''
-        Convert all input to an array
-        '''
         a = X.copy()
-        if isinstance(a, (pd.core.series.Series, list)):
+        if isinstance(a,list) | (isinstance(a,np.ndarray) & (a.size==len(a))):
             self.field_names = ['X_1']
+            a = np.array(a).reshape(len(a),1)
+        elif isinstance(a, pd.core.series.Series):    
+            self.field_names = a.name
             a = np.array(a).reshape(len(a),1)
         elif isinstance(a, pd.core.frame.DataFrame):
             self.field_names = a.columns
             a = np.array(a)
-        elif isinstance(a, np.ndarray) & (a.size==len(a)):
-            self.field_names = ['X_1']
-            a = np.array(a).reshape(len(a),1)
         elif isinstance(a, np.ndarray) & (a.size!=len(a)):
             self.field_names = self.__field_names(a.shape[1])
             a = np.array(a)
@@ -384,10 +424,12 @@ class outliers:
         digit = 10**math.ceil(np.log(n)/np.log(10))
         return ['X_' + str(digit+n)[1:] for n in range(n)]
     
-    def __nonan(self, X):
+    def __widgets(self):
 
         '''
-        Convert X into array and eliminate all missing values
+        Initialize widget i.e. progress-bar and text
         '''
-        a = np.array(X.copy())
-        return a[~np.isnan(a)]
+        self.w_t1 = widgets.HTMLMath(value='Calculating . . . ')
+        self.w_t2 = widgets.HTMLMath(value='')
+        w = widgets.HBox([self.w_t1,self.w_t2])
+        display(w); time.sleep(2)
