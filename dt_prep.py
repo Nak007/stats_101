@@ -1,4 +1,5 @@
 import pandas as pd, numpy as np, os, calendar
+from datetime import datetime
 
 def dt9_to_dt(date):
     
@@ -59,7 +60,7 @@ def roomnight(booking, scheme=['2020-07-01','2020-11-01'], return_date=False):
         timeframe = period(np.array([scheme[0]]+b+[scheme[1]]))
         a = np.hstack([np.zeros(t) if n!=1 else np.ones(t) 
                        for n,t in enumerate(timeframe)])
-    else: np.zeros(days(scheme))
+    else: return np.zeros(days(scheme))
     # Return with/without dates.
     if return_date: return a, datetime(scheme)
     else: return a
