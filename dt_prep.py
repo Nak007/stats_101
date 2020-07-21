@@ -1,4 +1,4 @@
-import pandas as pd, numpy as np, calendar
+import pandas as pd, numpy as np, os, calendar
 
 def dt9_to_dt(date):
     
@@ -63,3 +63,48 @@ def roomnight(booking, scheme=['2020-07-01','2020-11-01'], return_date=False):
     # Return with/without dates.
     if return_date: return a, datetime(scheme)
     else: return a
+
+def find_files(folder=None, comp=None):
+    
+    '''
+    Find files that are contained within `folder` and 
+    sorted by their modified date.
+    
+    Parameters
+    ----------
+    folder : `str`, optional, (default:None)
+    \t `folder` is a path where searching is executed, 
+    \t Its format must follow typical pattern e.g. 
+    \t '../example/'. If `None`, `os.getcwd()` is 
+    \t deployed instead (current directory).
+    
+    comp : list of `str`, optional, (default:None)
+    \t List of `str` components that are used in 
+    \t searching e.g. ['example','.txt']. All elements
+    \t within `comp` are joined togather with `OR`
+    \t operation.
+    
+    Returns
+    -------
+    Array of shape (n_found, [modified_date, file_path])
+    \t `n_found` is number of files found.
+    
+    Examples
+    --------
+    >>> import os, numpy as np
+    # Find "*.txt" within current directory.
+    >>> find_files(comp=['.txt'])
+    '''
+    try:
+        # Find file(s) in defined path.
+        if folder is None: folder = os.getcwd()
+        files = pd.Index(os.listdir(folder))
+        join = lambda s : '|'.join(s) if len(s)>1 else s[0]
+        if comp is not None: files = files[files.str.contains(join(comp))]
+            
+        # Find last modified date and sort by such date accordingly.
+        date = lambda d : datetime.fromtimestamp(d).strftime('%Y-%m-%d %H:%M:%S')
+        files = [(date(os.path.getmtime(folder+f)),folder+f)  for f in files]
+        files.sort(reverse=True, key=lambda x : x[0])
+        return np.array(files)
+    except: return None
